@@ -41,7 +41,7 @@ type Context struct {
 	props map[string]interface{}
 
 	// proxy object needed to access the proxy configuration.
-	proxy *Proxy
+	Proxy *Proxy
 }
 
 // newContext creates a new Context instance.
@@ -59,7 +59,7 @@ func newContext(conn net.Conn, localRW *bufio.ReadWriter, parent *Session, p *Pr
 		conn:    conn,
 		localRW: localRW,
 		props:   map[string]interface{}{},
-		proxy:   p,
+		Proxy:   p,
 	}
 }
 
