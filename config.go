@@ -5,7 +5,7 @@ import (
 	"net"
 	"net/http"
 
-	"github.com/AdguardTeam/gomitmproxy/mitm"
+	"github.com/Grizz1ya/gomitmproxy/mitm"
 )
 
 // OnConnectFunc is a declaration of the Config.OnConnect handler.

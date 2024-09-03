@@ -1,7 +1,7 @@
 [![Code Coverage](https://img.shields.io/codecov/c/github/AdguardTeam/gomitmproxy/master.svg)](https://codecov.io/github/AdguardTeam/gomitmproxy?branch=master)
-[![Go Report Card](https://goreportcard.com/badge/github.com/AdguardTeam/gomitmproxy)](https://goreportcard.com/report/AdguardTeam/gomitmproxy)
-[![GolangCI](https://golangci.com/badges/github.com/AdguardTeam/gomitmproxy.svg)](https://golangci.com/r/github.com/AdguardTeam/gomitmproxy)
-[![Go Doc](https://godoc.org/github.com/AdguardTeam/gomitmproxy?status.svg)](https://godoc.org/github.com/AdguardTeam/gomitmproxy)
+[![Go Report Card](https://goreportcard.com/badge/github.com/Grizz1ya/gomitmproxy)](https://goreportcard.com/report/AdguardTeam/gomitmproxy)
+[![GolangCI](https://golangci.com/badges/github.com/Grizz1ya/gomitmproxy.svg)](https://golangci.com/r/github.com/Grizz1ya/gomitmproxy)
+[![Go Doc](https://godoc.org/github.com/Grizz1ya/gomitmproxy?status.svg)](https://godoc.org/github.com/Grizz1ya/gomitmproxy)
 
 # gomitmproxy
 
@@ -10,11 +10,11 @@ It was created as a part of [AdGuard Home](https://github.com/AdguardTeam/AdGuar
 However, it can be used for different purposes so we decided to make it a separate project.
 
 ## Features
- 
-* HTTP proxy
-* HTTP over TLS (HTTPS) proxy
-* Proxy authorization
-* TLS termination
+
+- HTTP proxy
+- HTTP over TLS (HTTPS) proxy
+- Proxy authorization
+- TLS termination
 
 ## How to use gomitmproxy
 
@@ -30,7 +30,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/AdguardTeam/gomitmproxy"
+	"github.com/Grizz1ya/gomitmproxy"
 )
 
 func main() {
@@ -93,19 +93,19 @@ proxy := gomitmproxy.NewProxy(gomitmproxy.Config{
 
         res := session.Response()
         req := session.Request()
-    
+
         if strings.Index(res.Header.Get("Content-Type"), "text/html") != 0 {
             // Do nothing with non-HTML responses
             return nil
         }
-    
+
         b, err := proxyutil.ReadDecompressedBody(res)
         // Close the original body
         _ = res.Body.Close()
         if err != nil {
             return proxyutil.NewErrorResponse(req, err)
         }
-    
+
         // Use latin1 before modifying the body
         // Using this 1-byte encoding will let us preserve all original characters
         // regardless of what exactly is the encoding
@@ -113,13 +113,13 @@ proxy := gomitmproxy.NewProxy(gomitmproxy.Config{
         if err != nil {
             return proxyutil.NewErrorResponse(session.Request(), err)
         }
-    
+
         // Modifying the original body
         modifiedBody, err := proxyutil.EncodeLatin1(body + "<!-- EDITED -->")
         if err != nil {
             return proxyutil.NewErrorResponse(session.Request(), err)
         }
-    
+
         res.Body = ioutil.NopCloser(bytes.NewReader(modifiedBody))
         res.Header.Del("Content-Encoding")
         res.ContentLength = int64(len(modifiedBody))
@@ -171,6 +171,7 @@ openssl req -new -x509 -key demo.key -out demo.crt -days 3650 -addext subjectAlt
 ```
 
 Now you can use it to initialize `MITMConfig`:
+
 ```go
 tlsCert, err := tls.LoadX509KeyPair("demo.crt", "demo.key")
 if err != nil {
@@ -249,39 +250,39 @@ mitmConfig, err := mitm.NewConfig(x509c, privateKey, &CustomCertsStorage{
 
 ## Notable alternatives
 
-* [martian](https://github.com/google/martian) - an awesome debugging proxy with TLS interception support.
-* [goproxy](https://github.com/elazarl/goproxy) - also supports TLS interception and requests. 
+- [martian](https://github.com/google/martian) - an awesome debugging proxy with TLS interception support.
+- [goproxy](https://github.com/elazarl/goproxy) - also supports TLS interception and requests.
 
 ## TODO
 
-* [X] Basic HTTP proxy without MITM
-* [ ] Proxy
-    * [X] Expose APIs for the library users
-    * [X] How-to doc
-    * [X] Travis configuration
-    * [X] Proxy-Authorization
-    * [X] WebSockets support (see [this](https://github.com/google/martian/issues/31))
-    * [X] `certsCache` -- allow custom implementations
-    * [X] Support HTTP CONNECT over TLS
-    * [X] Test plain HTTP requests inside HTTP CONNECT
-    * [X] Test memory leaks
-    * [X] Editing response body in a callback
-    * [X] Handle unknown content-encoding values
-    * [X] Handle CONNECT to APIHost properly (without trying to actually connect anywhere)
-    * [X] Allow hijacking connections (!)
-    * [X] Multiple listeners
-    * [ ] Unit tests
-    * [ ] Check & fix TODOs
-    * [ ] Allow specifying net.Dialer
-    * [ ] Specify timeouts for http.Transport
-* [ ] MITM
-    * [X] Basic MITM
-    * [X] MITM exceptions
-    * [X] Handle invalid server certificates properly (not just reset connections)
-    * [X] Pass the most important tests on badssl.com/dashboard
-    * [X] Handle certificate authentication
-    * [ ] Allow configuring minimum supported TLS version
-    * [ ] OCSP check (see [example](https://stackoverflow.com/questions/46626963/golang-sending-ocsp-request-returns))
-    * [ ] (?) HPKP (see [example](https://github.com/tam7t/hpkp))
-    * [ ] (?) CT logs (see [example](https://github.com/google/certificate-transparency-go))
-    * [ ] (?) CRLSets (see [example](https://github.com/agl/crlset-tools))
+- [x] Basic HTTP proxy without MITM
+- [ ] Proxy
+  - [x] Expose APIs for the library users
+  - [x] How-to doc
+  - [x] Travis configuration
+  - [x] Proxy-Authorization
+  - [x] WebSockets support (see [this](https://github.com/google/martian/issues/31))
+  - [x] `certsCache` -- allow custom implementations
+  - [x] Support HTTP CONNECT over TLS
+  - [x] Test plain HTTP requests inside HTTP CONNECT
+  - [x] Test memory leaks
+  - [x] Editing response body in a callback
+  - [x] Handle unknown content-encoding values
+  - [x] Handle CONNECT to APIHost properly (without trying to actually connect anywhere)
+  - [x] Allow hijacking connections (!)
+  - [x] Multiple listeners
+  - [ ] Unit tests
+  - [ ] Check & fix TODOs
+  - [ ] Allow specifying net.Dialer
+  - [ ] Specify timeouts for http.Transport
+- [ ] MITM
+  - [x] Basic MITM
+  - [x] MITM exceptions
+  - [x] Handle invalid server certificates properly (not just reset connections)
+  - [x] Pass the most important tests on badssl.com/dashboard
+  - [x] Handle certificate authentication
+  - [ ] Allow configuring minimum supported TLS version
+  - [ ] OCSP check (see [example](https://stackoverflow.com/questions/46626963/golang-sending-ocsp-request-returns))
+  - [ ] (?) HPKP (see [example](https://github.com/tam7t/hpkp))
+  - [ ] (?) CT logs (see [example](https://github.com/google/certificate-transparency-go))
+  - [ ] (?) CRLSets (see [example](https://github.com/agl/crlset-tools))

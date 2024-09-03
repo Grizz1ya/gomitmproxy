@@ -1,4 +1,4 @@
-module github.com/AdguardTeam/gomitmproxy
+module github.com/Grizz1ya/gomitmproxy
 
 go 1.20
 

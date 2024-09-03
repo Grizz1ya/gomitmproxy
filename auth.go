@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/AdguardTeam/gomitmproxy/proxyutil"
+	"github.com/Grizz1ya/gomitmproxy/proxyutil"
 )
 
 // basicAuth returns an HTTP authorization header value according to RFC2617.
