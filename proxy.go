@@ -180,7 +180,7 @@ func (p *Proxy) serve(l net.Listener) (err error) {
 		}
 
 		localRW := bufio.NewReadWriter(bufio.NewReader(conn), bufio.NewWriter(conn))
-		ctx := newContext(conn, localRW, nil)
+		ctx := newContext(conn, localRW, nil, p)
 		log.Debug("id=%s: accepted connection from %s", ctx.ID(), ctx.conn.RemoteAddr())
 
 		if tcpConn, ok := conn.(*net.TCPConn); ok {
@@ -522,14 +522,14 @@ func (p *Proxy) handleConnect(session *Session) (err error) {
 			}
 
 			newLocalRW := bufio.NewReadWriter(bufio.NewReader(tlsConn), bufio.NewWriter(tlsConn))
-			newCtx := newContext(tlsConn, newLocalRW, session)
+			newCtx := newContext(tlsConn, newLocalRW, session, p)
 			p.handleLoop(newCtx)
 
 			return errClose
 		}
 
 		newLocalRW := bufio.NewReadWriter(bufio.NewReader(pc), bufio.NewWriter(pc))
-		newCtx := newContext(pc, newLocalRW, session)
+		newCtx := newContext(pc, newLocalRW, session, p)
 		p.handleLoop(newCtx)
 
 		return errClose

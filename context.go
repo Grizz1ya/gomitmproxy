@@ -39,10 +39,13 @@ type Context struct {
 	// props is a map with custom properties that can be used by gomitmproxy to
 	// store additional context properties.
 	props map[string]interface{}
+
+	// proxy object needed to access the proxy configuration.
+	proxy *Proxy
 }
 
 // newContext creates a new Context instance.
-func newContext(conn net.Conn, localRW *bufio.ReadWriter, parent *Session) (ctx *Context) {
+func newContext(conn net.Conn, localRW *bufio.ReadWriter, parent *Session, p *Proxy) (ctx *Context) {
 	var contextID int64
 	if parent == nil {
 		contextID = atomic.AddInt64(&currentContextID, 1)
@@ -56,6 +59,7 @@ func newContext(conn net.Conn, localRW *bufio.ReadWriter, parent *Session) (ctx 
 		conn:    conn,
 		localRW: localRW,
 		props:   map[string]interface{}{},
+		proxy:   p,
 	}
 }
 
