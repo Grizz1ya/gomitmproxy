@@ -26,9 +26,7 @@ func main() {
 
 	proxy := gomitmproxy.NewProxy(gomitmproxy.Config{
 		ListenAddr: addr,
-
-		Username: "user",
-		Password: "pass",
+		Credentials: map[string]string{},
 		APIHost:  "gomitmproxy",
 	})
 

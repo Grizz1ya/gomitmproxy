@@ -73,8 +73,7 @@ func main() {
 		ListenAddr: addr,
 		TLSConfig:  tlsConfig,
 
-		Username: "user",
-		Password: "pass",
+		Credentials: map[string]string{},
 		APIHost:  "gomitmproxy",
 
 		MITMConfig:     mitmConfig,

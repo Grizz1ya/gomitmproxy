@@ -19,6 +19,24 @@ func basicAuth(username, password string) string {
 	return base64.StdEncoding.EncodeToString([]byte(auth))
 }
 
+// parse username and password from the Authorization header
+func parseBasicAuth(auth string) (username, password string, err error) {
+	creds, err := base64.StdEncoding.DecodeString(auth)
+	if err != nil {
+		return "", "", err
+	}
+
+	parts := strings.SplitN(string(creds), ":", 2)
+	if len(parts) != 2 {
+		return "", "", nil
+	}
+
+	username = parts[0]
+	password = parts[1]
+
+	return username, password, nil
+}
+
 // newNotAuthorizedResponse creates a new "407 (Proxy Authentication Required)"
 // response.
 func newNotAuthorizedResponse(session *Session) *http.Response {
@@ -39,7 +57,7 @@ func (p *Proxy) authorize(session *Session) (bool, *http.Response) {
 		return true, nil
 	}
 
-	if p.Username == "" {
+	if len(p.Credentials) == 0 {
 		return true, nil
 	}
 
@@ -50,9 +68,20 @@ func (p *Proxy) authorize(session *Session) (bool, *http.Response) {
 	}
 
 	authHeader := proxyAuth[len("Basic "):]
-	if authHeader != basicAuth(p.Username, p.Password) {
+	username, _, err := parseBasicAuth(authHeader)
+	if err != nil {
 		return false, newNotAuthorizedResponse(session)
 	}
+
+	if credPassword, ok := p.Credentials[username]; ok {
+		if basicAuth(username, credPassword) != authHeader {
+			return false, newNotAuthorizedResponse(session)
+		}
+	} else {
+		return false, newNotAuthorizedResponse(session)
+	}
+
+	session.SetProp("username", username)
 
 	return true, nil
 }

@@ -29,11 +29,8 @@ type Config struct {
 	// the proxy will work as a simple plain HTTP proxy.
 	TLSConfig *tls.Config
 
-	// Username is the username to be used in the "Proxy-Authorization" header.
-	Username string
-
-	// Password is the password to be used in the "Proxy-Authorization" header.
-	Password string
+	// List of authorization credentials.
+	Credentials map[string]string
 
 	// MITMConfig defines the MITM configuration of the proxy. If it is not set
 	// MITM won't be enabled for this proxy instance.

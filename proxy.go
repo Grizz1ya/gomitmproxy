@@ -102,6 +102,16 @@ func NewProxy(config Config) *Proxy {
 	return proxy
 }
 
+// add new credentials to the proxy.
+func (p *Proxy) AddCredentials(username, password string) {
+	p.Credentials[username] = password
+}
+
+// delete credentials from the proxy.
+func (p *Proxy) DeleteCredentials(username string) {
+	delete(p.Credentials, username)
+}
+
 // Addr returns the address this proxy listens to.
 func (p *Proxy) Addr() (addr net.Addr) {
 	return p.addr
@@ -180,7 +190,7 @@ func (p *Proxy) serve(l net.Listener) (err error) {
 		}
 
 		localRW := bufio.NewReadWriter(bufio.NewReader(conn), bufio.NewWriter(conn))
-		ctx := newContext(conn, localRW, nil, p)
+		ctx := newContext(conn, localRW, nil)
 		log.Debug("id=%s: accepted connection from %s", ctx.ID(), ctx.conn.RemoteAddr())
 
 		if tcpConn, ok := conn.(*net.TCPConn); ok {
@@ -258,22 +268,20 @@ func (p *Proxy) handleRequest(ctx *Context) (err error) {
 
 	if !customRes {
 		// check proxy authorization first.
-		if p.Username != "" {
-			auth, res := p.authorize(session)
-			if !auth {
-				log.Debug("id=%s: proxy auth required", session.ID())
-				session.res = res
+		auth, res := p.authorize(session)
+		if !auth {
+			log.Debug("id=%s: proxy auth required", session.ID())
+			session.res = res
 
-				defer log.OnCloserError(res.Body, log.DEBUG)
+			defer log.OnCloserError(res.Body, log.DEBUG)
 
-				_ = p.writeResponse(session)
+			_ = p.writeResponse(session)
 
-				// Do not return any error here as we must keep the connection
-				// alive. When the client receives 407 error, it can write
-				// another request with user credentials to the same connection.
-				// See https://github.com/Grizz1ya/gomitmproxy/pull/19.
-				return nil
-			}
+			// Do not return any error here as we must keep the connection
+			// alive. When the client receives 407 error, it can write
+			// another request with user credentials to the same connection.
+			// See https://github.com/Grizz1ya/gomitmproxy/pull/19.
+			return nil
 		}
 
 		if session.req.Header.Get("Upgrade") == "websocket" {
@@ -522,14 +530,14 @@ func (p *Proxy) handleConnect(session *Session) (err error) {
 			}
 
 			newLocalRW := bufio.NewReadWriter(bufio.NewReader(tlsConn), bufio.NewWriter(tlsConn))
-			newCtx := newContext(tlsConn, newLocalRW, session, p)
+			newCtx := newContext(tlsConn, newLocalRW, session)
 			p.handleLoop(newCtx)
 
 			return errClose
 		}
 
 		newLocalRW := bufio.NewReadWriter(bufio.NewReader(pc), bufio.NewWriter(pc))
-		newCtx := newContext(pc, newLocalRW, session, p)
+		newCtx := newContext(pc, newLocalRW, session)
 		p.handleLoop(newCtx)
 
 		return errClose
