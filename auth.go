@@ -54,6 +54,16 @@ func newNotAuthorizedResponse(session *Session) *http.Response {
 func (p *Proxy) authorize(session *Session) (bool, *http.Response) {
 	if session.ctx.parent != nil {
 		// If we're here, it means the connection is authorized already.
+		_, ok := session.Ctx().GetProp("username")
+		if !ok {
+			usernameofParentCtx, ok := session.ctx.parent.GetProp("username")
+			if ok {
+				session.Ctx().SetProp("username", usernameofParentCtx)
+			} else {
+				return false, newNotAuthorizedResponse(session)
+			}
+		}
+
 		return true, nil
 	}
 
