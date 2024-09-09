@@ -12,7 +12,6 @@ import (
 	"os/signal"
 	"strings"
 	"syscall"
-	"time"
 
 	"github.com/AdguardTeam/golibs/log"
 	"github.com/Grizz1ya/gomitmproxy"
@@ -25,9 +24,9 @@ import (
 func main() {
 	log.SetLevel(log.DEBUG)
 
-	go func() {
-		log.Println(http.ListenAndServe("localhost:6060", nil))
-	}()
+	// go func() {
+	// 	log.Println(http.ListenAndServe("localhost:6060", nil))
+	// }()
 
 	// Read the MITM cert and key.
 	tlsCert, err := tls.LoadX509KeyPair("demo.crt", "demo.key")
@@ -49,19 +48,19 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// Generate certs valid for 7 days.
-	mitmConfig.SetValidity(time.Hour * 24 * 7)
-	// Set certs organization.
-	mitmConfig.SetOrganization("gomitmproxy")
+	// // Generate certs valid for 7 days.
+	// mitmConfig.SetValidity(time.Hour * 24 * 7)
+	// // Set certs organization.
+	// mitmConfig.SetOrganization("gomitmproxy")
 
-	// Generate a cert-key pair for the HTTP-over-TLS proxy.
-	proxyCert, err := mitmConfig.GetOrCreateCert("127.0.0.1")
-	if err != nil {
-		panic(err)
-	}
-	tlsConfig := &tls.Config{
-		Certificates: []tls.Certificate{*proxyCert},
-	}
+	// // Generate a cert-key pair for the HTTP-over-TLS proxy.
+	// proxyCert, err := mitmConfig.GetOrCreateCert("127.0.0.1")
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// tlsConfig := &tls.Config{
+	// 	Certificates: []tls.Certificate{*proxyCert},
+	// }
 
 	// Prepare the proxy.
 	addr := &net.TCPAddr{
@@ -71,18 +70,20 @@ func main() {
 
 	proxy := gomitmproxy.NewProxy(gomitmproxy.Config{
 		ListenAddr: addr,
-		TLSConfig:  tlsConfig,
+		// TLSConfig:  tlsConfig,
 
-		Credentials: map[string]string{},
-		APIHost:  "gomitmproxy",
+		Credentials: make(map[string]string),
+		// APIHost:  "gomitmproxy",
 
 		MITMConfig:     mitmConfig,
-		MITMExceptions: []string{"example.com"},
+		// MITMExceptions: []string{"example.com"},
 
 		OnRequest:  onRequest,
-		OnResponse: onResponse,
-		OnConnect:  onConnect,
+		// OnResponse: onResponse,
+		// OnConnect:  onConnect,
 	})
+
+	proxy.AddCredentials("admin", "admin")
 
 	err = proxy.Start()
 	if err != nil {
@@ -101,6 +102,7 @@ func onRequest(session *gomitmproxy.Session) (*http.Request, *http.Response) {
 	req := session.Request()
 
 	log.Printf("onRequest: %s %s", req.Method, req.URL.String())
+	log.Println(session.Ctx().GetProp("username"))
 
 	if req.URL.Host == "example.net" {
 		body := strings.NewReader("<html><body><h1>Replaced response</h1></body></html>")

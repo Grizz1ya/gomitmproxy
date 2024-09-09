@@ -81,7 +81,7 @@ func (p *Proxy) authorize(session *Session) (bool, *http.Response) {
 		return false, newNotAuthorizedResponse(session)
 	}
 
-	session.SetProp("username", username)
+	session.Ctx().SetProp("username", username)
 
 	return true, nil
 }

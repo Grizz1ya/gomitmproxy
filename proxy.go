@@ -248,6 +248,23 @@ func (p *Proxy) handleRequest(ctx *Context) (err error) {
 	p.prepareRequest(origReq, session)
 	log.Debug("id=%s: handle request %s %s", session.ID(), origReq.Method, origReq.URL.String())
 
+	// check proxy authorization first.
+	auth, res := p.authorize(session)
+	if !auth {
+		log.Debug("id=%s: proxy auth required", session.ID())
+		session.res = res
+
+		defer log.OnCloserError(res.Body, log.DEBUG)
+
+		_ = p.writeResponse(session)
+
+		// Do not return any error here as we must keep the connection
+		// alive. When the client receives 407 error, it can write
+		// another request with user credentials to the same connection.
+		// See https://github.com/Grizz1ya/gomitmproxy/pull/19.
+		return nil
+	}
+
 	customRes := false
 	if p.OnRequest != nil {
 		newReq, newRes := p.OnRequest(session)
@@ -267,23 +284,6 @@ func (p *Proxy) handleRequest(ctx *Context) (err error) {
 	}
 
 	if !customRes {
-		// check proxy authorization first.
-		auth, res := p.authorize(session)
-		if !auth {
-			log.Debug("id=%s: proxy auth required", session.ID())
-			session.res = res
-
-			defer log.OnCloserError(res.Body, log.DEBUG)
-
-			_ = p.writeResponse(session)
-
-			// Do not return any error here as we must keep the connection
-			// alive. When the client receives 407 error, it can write
-			// another request with user credentials to the same connection.
-			// See https://github.com/Grizz1ya/gomitmproxy/pull/19.
-			return nil
-		}
-
 		if session.req.Header.Get("Upgrade") == "websocket" {
 			// connection protocol will be upgraded.
 			return p.handleTunnel(session)

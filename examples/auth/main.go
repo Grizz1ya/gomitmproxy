@@ -26,9 +26,11 @@ func main() {
 
 	proxy := gomitmproxy.NewProxy(gomitmproxy.Config{
 		ListenAddr: addr,
-		Credentials: map[string]string{},
+		Credentials: make(map[string]string),
 		APIHost:  "gomitmproxy",
 	})
+
+	proxy.AddCredentials("admin", "admin")
 
 	err := proxy.Start()
 	if err != nil {
