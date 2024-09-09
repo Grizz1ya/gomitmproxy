@@ -85,6 +85,8 @@ func main() {
 		// OnConnect:  onConnect,
 	})
 
+	proxy.AddCredentials("26a849c3-3093-4e44-9936-4e92c0b2acd0", "hZPXaeYGn30")
+
 	err = proxy.Start()
 	if err != nil {
 		log.Fatal(err)
@@ -101,7 +103,7 @@ func main() {
 func onRequest(session *gomitmproxy.Session) (*http.Request, *http.Response) {
 	req := session.Request()
 
-	log.Printf("onRequest: %s %s", req.Method, req.URL.String())
+	// log.Printf("onRequest: %s %s", req.Method, req.URL.String())
 	username, ok := session.Ctx().GetProp("username")
 	if !ok {
 		log.Error("username not found")
@@ -112,9 +114,8 @@ func onRequest(session *gomitmproxy.Session) (*http.Request, *http.Response) {
 		// res.Header.Set("Proxy-Authenticate", "Basic")
 		// return nil, res
 	} else {
-		log.Printf("username: %s", username)
+		log.Info("username: %s", username)
 	}
-	proxy.AddCredentials("test", "test")
 	
 
 	if req.URL.Host == "example.net" {
