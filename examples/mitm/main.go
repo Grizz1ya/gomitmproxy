@@ -21,8 +21,10 @@ import (
 	_ "net/http/pprof"
 )
 
+var proxy *gomitmproxy.Proxy 
+
 func main() {
-	log.SetLevel(log.DEBUG)
+	log.SetLevel(log.INFO)
 
 	// go func() {
 	// 	log.Println(http.ListenAndServe("localhost:6060", nil))
@@ -68,7 +70,7 @@ func main() {
 		Port: 3333,
 	}
 
-	proxy := gomitmproxy.NewProxy(gomitmproxy.Config{
+	proxy = gomitmproxy.NewProxy(gomitmproxy.Config{
 		ListenAddr: addr,
 		// TLSConfig:  tlsConfig,
 
@@ -82,8 +84,6 @@ func main() {
 		// OnResponse: onResponse,
 		// OnConnect:  onConnect,
 	})
-
-	proxy.AddCredentials("admin", "admin")
 
 	err = proxy.Start()
 	if err != nil {
@@ -102,7 +102,20 @@ func onRequest(session *gomitmproxy.Session) (*http.Request, *http.Response) {
 	req := session.Request()
 
 	log.Printf("onRequest: %s %s", req.Method, req.URL.String())
-	log.Println(session.Ctx().GetProp("username"))
+	username, ok := session.Ctx().GetProp("username")
+	if !ok {
+		log.Error("username not found")
+
+		// body := strings.NewReader("<html><body><h1>username not found</h1></body></html>")
+		// res := proxyutil.NewResponse(http.StatusProxyAuthRequired, body, req)
+		// // See https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Proxy-Authenticate.
+		// res.Header.Set("Proxy-Authenticate", "Basic")
+		// return nil, res
+	} else {
+		log.Printf("username: %s", username)
+	}
+	proxy.AddCredentials("test", "test")
+	
 
 	if req.URL.Host == "example.net" {
 		body := strings.NewReader("<html><body><h1>Replaced response</h1></body></html>")

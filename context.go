@@ -38,7 +38,7 @@ type Context struct {
 
 	// props is a map with custom properties that can be used by gomitmproxy to
 	// store additional context properties.
-	props map[string]interface{}
+	Props map[string]interface{}
 }
 
 // newContext creates a new Context instance.
@@ -55,7 +55,7 @@ func newContext(conn net.Conn, localRW *bufio.ReadWriter, parent *Session) (ctx 
 		parent:  parent,
 		conn:    conn,
 		localRW: localRW,
-		props:   map[string]interface{}{},
+	Props:   map[string]interface{}{},
 	}
 }
 
@@ -92,14 +92,14 @@ func (c *Context) SetDeadline(t time.Time) (err error) {
 
 // GetProp gets context property (previously saved using SetProp).
 func (c *Context) GetProp(key string) (v interface{}, ok bool) {
-	v, ok = c.props[key]
+	v, ok = c.Props[key]
 
 	return v, ok
 }
 
 // SetProp sets the context's property.
 func (c *Context) SetProp(key string, val interface{}) {
-	c.props[key] = val
+	c.Props[key] = val
 }
 
 // Session contains all the necessary information about the request-response
