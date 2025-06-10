@@ -144,6 +144,26 @@ proxy := gomitmproxy.NewProxy(gomitmproxy.Config{
 })
 ```
 
+### Many authorization credentials
+
+If you want to protect your proxy with Basic authentication, set `Username` and `Password`
+fields in the proxy configuration.
+
+```go
+proxy := gomitmproxy.NewProxy(gomitmproxy.Config{
+    ListenAddr: &net.TCPAddr{
+        IP:   net.IPv4(0, 0, 0, 0),
+        Port: 8080,
+    },
+    Credentials: make(map[string]string),
+})
+
+proxy.AddCredentials("username", "password")
+proxy.DeleteCredentials("username")
+
+
+```
+
 ### HTTP over TLS (HTTPS) proxy
 
 If you want to protect yourself from eavesdropping on your traffic to proxy, you can configure
