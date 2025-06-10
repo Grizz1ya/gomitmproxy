@@ -146,15 +146,34 @@ proxy := gomitmproxy.NewProxy(gomitmproxy.Config{
 
 ### Many authorization credentials
 
-If you want to protect your proxy with Basic authentication, set `Username` and `Password`
-fields in the proxy configuration.
+If you want to create multiple proxy accounts in order to separate their handlers in the future.
 
 ```go
+
+func onRequest(session *gomitmproxy.Session) (request *http.Request, response *http.Response) {
+    req := session.Request()
+    if req.Method == "CONNECT" {
+        return nil, nil
+    }
+
+    // * username of connection
+    usernameProp, ok := session.Ctx().GetProp("username")
+    if !ok {
+        return nil, raiseProxyAuthError(req, "username not found in context")
+    }
+
+    // * something with username, for example: connect with linked another proxy for specified username * //
+
+    return nil, nil
+}
+
+
 proxy := gomitmproxy.NewProxy(gomitmproxy.Config{
     ListenAddr: &net.TCPAddr{
         IP:   net.IPv4(0, 0, 0, 0),
         Port: 8080,
     },
+    OnRequest: onRequest,
     Credentials: make(map[string]string),
 })
 
